@@ -155,13 +155,14 @@
 
         window.onfocus = function () {
             app.$emit('start');
+            app.$emit('reset');
         }
 
         window.onblur = function () {
             app.$emit('stop');
         }
 
-        window.onfocus = window.onkeydown = window.onmousemove = 
+        window.onkeydown = window.onmousemove = 
             window.onwheel = window.onmousewheel = 
             window.onmousedown = window.onkeyup = function () {
                 app.$emit('reset');
