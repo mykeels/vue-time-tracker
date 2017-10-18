@@ -1,0 +1,14 @@
+body { 
+    padding: 5em; font-family: monospace; line-height: 1.5
+}
+
+.clock {
+    width: 500px;
+    font-size: 50px;
+    border: 1px solid black;
+    text-align: center;
+}
+
+.clock .section::before {
+    content: ':'
+}

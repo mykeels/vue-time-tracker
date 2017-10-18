@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Vue Time Tracker</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <center>
+            <div class="clock row">
+                {{time}}
+            </div>
+            <br>
+            <h3>Switch tabs or switch windows while keeping this open and see what happens</h3>
+            <br>
+            <h3>We can use something similar for time tracking ...</h3>
+        </center>
+    </div>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
+    <script>
+        const app = new Vue({
+            el: '.clock',
+            data: {
+                count: 3600
+            },
+            methods: {
+                pad (num, count) {
+                    count = count || Number.POSITIVE_INFINITY;
+                    const $num = num + '';
+                    return '0'.repeat(count - $num.length) + $num;
+                },
+                start() {
+                    this.interval = setInterval((function () {
+                        this.count++;
+                    }).bind(this), 100)
+                },
+                stop() {
+                    clearInterval(this.interval)
+                }
+            },
+            computed: {
+                hours() {
+                    return this.pad(Math.floor(this.count / 3600), 2)
+                },
+                minutes() {
+                    return this.pad(Math.floor((this.count - (this.hours * 3600)) / 60), 2)
+                },
+                seconds() {
+                    return this.pad(this.count - (this.minutes * 60) - (this.hours * 3600), 2)
+                },
+                time() {
+                    return `${this.hours} : ${this.minutes} : ${this.seconds}`;
+                }
+            }
+        })
+
+        window.onload = window.onfocus = function () {
+            app.start.call(app);
+            console.log("timer started at ", app.time);
+        }
+
+        window.onblur = function () {
+            app.stop.call(app);
+            console.log("timer paused at ", app.time);
+        }
+    </script>
+</body>
+</html>
