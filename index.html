@@ -12,7 +12,9 @@
     <div class="container">
         <center>
             <div class="clock row">
-                {{time}}
+                <time-tracker inline-template>
+                    <div>{{time}}</div>
+                </time-tracker>
             </div>
             <br>
             <h3>Switch tabs or switch windows while keeping this open and see what happens</h3>
@@ -22,10 +24,11 @@
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
     <script>
-        const app = new Vue({
-            el: '.clock',
-            data: {
-                count: 0
+        const TimeTracker = Vue.component('time-tracker', {
+            data() {
+                return {
+                    count: 0
+                }
             },
             methods: {
                 pad (num, count) {
@@ -59,17 +62,28 @@
             },
             mounted() {
                 this.start()
+
+                this.$parent.$on('start', this.start.bind(this));
+                this.$parent.$on('stop', this.stop.bind(this));
+            }
+        })
+
+        const app = new Vue({
+            el: '.clock',
+            components: { 'time-tracker': TimeTracker },
+            methods: {
+                startTracking() {
+
+                }
             }
         })
 
         window.onfocus = function () {
-            app.start.call(app);
-            console.log("timer started at ", app.time);
+            app.$emit('start');
         }
 
         window.onblur = function () {
-            app.stop.call(app);
-            console.log("timer paused at ", app.time);
+            app.$emit('stop');
         }
     </script>
 </body>
