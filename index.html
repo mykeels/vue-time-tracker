@@ -34,6 +34,7 @@
                     return '0'.repeat(count - $num.length) + $num;
                 },
                 start() {
+                    if (this.interval) clearInterval(this.interval);
                     this.interval = setInterval((function () {
                         this.count++;
                     }).bind(this), 100)
@@ -55,10 +56,13 @@
                 time() {
                     return `${this.hours} : ${this.minutes} : ${this.seconds}`;
                 }
+            },
+            mounted() {
+                this.start()
             }
         })
 
-        window.onload = window.onfocus = function () {
+        window.onfocus = function () {
             app.start.call(app);
             console.log("timer started at ", app.time);
         }
