@@ -13,13 +13,34 @@
         <center>
             <div class="clock row">
                 <time-tracker inline-template>
-                    <div>{{time}}</div>
+                    <div>
+                        <h3>Time Tracker</h3>
+                        <div class="time-tracker">{{time}}</div>
+                    </div>
                 </time-tracker>
+                <inactivity-tracker inline-template>
+                    <div>
+                        <h3>Inactivity Tracker</h3>
+                        <div class="activity-tracker">{{time}}</div>
+                    </div>
+                </inactivity-tracker>
             </div>
             <br>
             <h3>Switch tabs or switch windows while keeping this open and see what happens</h3>
             <br>
             <h3>We can use something similar for time tracking ...</h3>
+            <br>
+            <h3>Inactivity Tracker will reset on:</h3>
+            <ul>
+                <li>onfocus</li>
+                <li>onkeydown</li>
+                <li>onmousemove</li>
+                <li>onwheel</li>
+                <li>onmousewheel</li>
+                <li>onmousedown</li>
+                <li>onkeyup</li>
+                <li>15 seconds elapsed since last activity</li>
+            </ul>
         </center>
     </div>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.2/vue.min.js"></script>
@@ -68,9 +89,68 @@
             }
         })
 
+        const InactivityTracker = Vue.component('inactivity-tracker', {
+            data() {
+                return {
+                    startTime: new Date(),
+                    endTime: new Date()
+                }
+            },
+            methods: {
+                pad (num, count) {
+                    num = Math.floor(num);
+                    count = count || Number.POSITIVE_INFINITY;
+                    const $num = num + '';
+                    return '0'.repeat(count - $num.length) + $num;
+                },
+                start() {
+                    if (this.interval) clearInterval(this.interval);
+                    this.interval = setInterval((function () {
+                        this.endTime = new Date();
+                        if (this.seconds >= 15) {
+                            alert("15 seconds have elapsed since your last activity")
+                            this.reset();
+                        }
+                    }).bind(this), 1000)
+                },
+                stop() {
+                    clearInterval(this.interval)
+                },
+                reset() {
+                    this.startTime = this.endTime;
+                    console.log("inactivity-tracker-reset");
+                }
+            },
+            computed: {
+                elapsed() {
+                    return this.endTime - this.startTime;
+                },
+                hours() {
+                    return this.pad(Math.floor((this.elapsed / 1000) / 3600), 2)
+                },
+                minutes() {
+                    return this.pad(Math.floor(((this.elapsed / 1000) - (this.hours * 3600)) / 60), 2)
+                },
+                seconds() {
+                    return this.pad((this.elapsed / 1000) - (this.minutes * 60) - (this.hours * 3600), 2)
+                },
+                time() {
+                    return `${this.hours} : ${this.minutes} : ${this.seconds}`;
+                }
+            },
+            mounted() {
+                this.start()
+
+                this.$parent.$on('reset', this.reset.bind(this))
+            }
+        })
+
         const app = new Vue({
             el: '.clock',
-            components: { 'time-tracker': TimeTracker }
+            components: { 
+                'time-tracker': TimeTracker,
+                'inactivity-tracker': InactivityTracker
+            }
         })
 
         window.onfocus = function () {
@@ -80,6 +160,12 @@
         window.onblur = function () {
             app.$emit('stop');
         }
+
+        window.onfocus = window.onkeydown = window.onmousemove = 
+            window.onwheel = window.onmousewheel = 
+            window.onmousedown = window.onkeyup = function () {
+                app.$emit('reset');
+            }
     </script>
 </body>
 </html>
